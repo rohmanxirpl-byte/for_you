@@ -35,6 +35,49 @@
     font-weight: 700;
   }
 
+  /* ---------- start overlay (needed so audio can autoplay on tap) ---------- */
+  .start-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: linear-gradient(180deg, #FFEDF3 0%, var(--cream) 65%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+  }
+  .start-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .start-overlay h2 {
+    color: var(--pink-deep);
+    font-size: clamp(22px, 6vw, 30px);
+    margin: 0 0 10px;
+  }
+  .start-overlay p {
+    color: var(--plum-soft);
+    margin: 0 0 26px;
+    max-width: 320px;
+    line-height: 1.6;
+  }
+  .start-btn {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 17px;
+    color: #fff;
+    background: var(--pink-deep);
+    border: none;
+    padding: 16px 36px;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 10px 24px -10px rgba(231,94,133,0.6);
+  }
+  .start-btn:active { transform: scale(0.97); }
+
   /* ---------- floating background doodles ---------- */
   .sky {
     position: relative;
@@ -212,6 +255,23 @@
     100% { transform: translateY(-90px) scale(1.2); opacity: 0; }
   }
 
+  /* ---------- floating music toggle ---------- */
+  .music-toggle {
+    position: fixed;
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    right: 20px;
+    z-index: 500;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--pink-deep);
+    color: #fff;
+    border: none;
+    font-size: 20px;
+    box-shadow: 0 10px 24px -10px rgba(231,94,133,0.6);
+    cursor: pointer;
+  }
+
   footer {
     text-align: center;
     padding: 50px 24px 70px;
@@ -230,10 +290,20 @@
 
 <h2 class="sr-only">Halaman ucapan semangat penuh warna dengan karakter kelinci dan anak ayam lucu, pesan hangat, dan tombol interaktif untuk menghibur seseorang</h2>
 
-<audio controls loop>
-  <source src="ssstik.io_1789990882052.mp3 type="audio/mpeg">
+<!-- Overlay ini WAJIB ada supaya musik bisa autoplay:
+     browser memblokir autoplay bersuara sebelum ada klik dari user -->
+<div class="start-overlay" id="startOverlay">
+  <h2>Untuk kamu 💌</h2>
+  <p>Ketuk tombol di bawah untuk membuka halaman ini (sekalian nyalain lagunya ya)</p>
+  <button class="start-btn" id="startBtn">Buka ✨</button>
+</div>
+
+<audio id="bgMusic" loop>
+  <source src="ssstik.io_1789990882052.mp3" type="audio/mpeg">
 </audio>
-  
+
+<button class="music-toggle" id="musicToggle" aria-label="Mute/unmute musik">🔊</button>
+
 <div class="sky hero">
   <!-- floating doodles -->
   <svg class="doodle" style="top:8%; left:8%; width:34px; animation-delay:0s;" viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.6-9.5-9C.6 8.2 2.3 4.5 6 4.5c2 0 3.3 1.1 4 2.2 0.7-1.1 2-2.2 4-2.2 3.7 0 5.4 3.7 3.5 7.5C19 16.4 12 21 12 21z" fill="#FF9DB8"/></svg>
@@ -359,6 +429,29 @@
       e.preventDefault();
       var rect = zone.getBoundingClientRect();
       popHeart(rect.width / 2, rect.height / 2);
+    }
+  });
+
+  /* ---------- musik: play begitu tombol "Buka" ditekan ---------- */
+  var overlay = document.getElementById('startOverlay');
+  var startBtn = document.getElementById('startBtn');
+  var music = document.getElementById('bgMusic');
+  var musicToggle = document.getElementById('musicToggle');
+
+  startBtn.addEventListener('click', function () {
+    music.play().catch(function (err) {
+      console.log('Autoplay diblokir:', err);
+    });
+    overlay.classList.add('hidden');
+  });
+
+  musicToggle.addEventListener('click', function () {
+    if (music.paused) {
+      music.play();
+      musicToggle.textContent = '🔊';
+    } else {
+      music.pause();
+      musicToggle.textContent = '🔇';
     }
   });
 </script>
